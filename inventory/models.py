@@ -9,7 +9,7 @@ from django.db.models import Sum
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=250)
+    name = models.CharField(max_length=250, unique=True)
     description = models.TextField()
     status = models.CharField(
         max_length=2, choices=(("1", "Active"), ("2", "Inactive")), default=1
