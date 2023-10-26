@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import CategoryView
+from .views import StockViewSet
 
 
 router = routers.DefaultRouter()
-router.register(r"category", CategoryView)
+router.register(r"products", StockViewSet)
 
 
 urlpatterns = [

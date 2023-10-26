@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "inventory",
+    "category",
+    "products",
+    "stock",
 ]
 
 MIDDLEWARE = [
@@ -96,6 +98,7 @@ WSGI_APPLICATION = "e_shop_settings.wsgi.application"
 #     }
 # }
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -107,6 +110,8 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 5,
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         # Other authentication classes (if needed)

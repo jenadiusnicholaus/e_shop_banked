@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from .serializers import CreateUserSerializer, GetUserSerializer, UserProfileSerializer
+from .serializers import RegisterSerializer, GetUserSerializer, UserProfileSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -16,10 +16,10 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = GetUserSerializer
 
 
-class CreateUserView(generics.CreateAPIView):
+class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = CreateUserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -55,7 +55,7 @@ class GetUserProfileView(generics.RetrieveAPIView):
 
         # Here, we'll use the authenticated user's ID to retrieve the profile
         try:
-            profile = UserProfile.objects.get(id=user.id)
+            profile = UserProfile.objects.get(user=user)
             serializer = self.get_serializer(profile)
             return Response(serializer.data)
         except User.DoesNotExist:

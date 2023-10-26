@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework import viewsets
 from rest_framework.response import Response
+
+from Helpers.helpers import ProductsListOrSingleObject
 from .models import Category
 
 from .serializers import CategorySerializers
@@ -9,6 +11,16 @@ from .serializers import CategorySerializers
 
 # Category views set
 class CategoryView(viewsets.ModelViewSet):
+    """
+    This  product query set, where by you can do the from action in this
+    view set,
+    1. You get a list if  catagory )
+    2. You can get a single Category object
+    3. You can post a new  product
+    4. You can  Edit the specific product  details by
+    5. you can delete a specific category
+    """
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializers
 
@@ -20,41 +32,14 @@ class CategoryView(viewsets.ModelViewSet):
         )
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset()).order_by("-date_created")
 
         _catogory_id = request.query_params.get("category_id", None)
 
         # get all catories  if no is specified
-        if _catogory_id is None:
-            serializer = self.get_serializer(queryset, many=True)
-            if queryset.exists():
-                response_obj = {
-                    "success": True,
-                    "status_code": status.HTTP_200_OK,
-                    "message": "Found",
-                    "data": {"categories": serializer.data},
-                }
-            return Response(data=response_obj, status=status.HTTP_200_OK)
-
-        # if the id is specified then get  specific  category
-        try:
-            q = Category.objects.get(id=_catogory_id)
-            serializer = self.get_serializer(q)
-
-            response_obj = {
-                "success": True,
-                "status_code": status.HTTP_200_OK,
-                "message": "Found",
-                "data": {"booking_state": serializer.data},
-            }
-            return Response(data=response_obj, status=status.HTTP_200_OK)
-        except:
-            response_obj = {
-                "success": False,
-                "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "Not Found",
-            }
-            return Response(data=response_obj, status=status.HTTP_404_NOT_FOUND)
+        return ProductsListOrSingleObject.get_single_or_alist(
+            self, id=_catogory_id, queryset=queryset
+        )
 
     # create a new category
     def create(self, request, *args, **kwargs):
@@ -72,19 +57,9 @@ class CategoryView(viewsets.ModelViewSet):
     def put(self, request, *args, **kwargs):
         _catogory_id = request.query_params.get("category_id", None)
 
-        _status = request.data.get("status")
-        _name = request.data.get("name")
-        _description = request.data.get("description")
-
-        instance = self.get_queryset().get(
-            id=_catogory_id,
+        serializer = self.get_serializer(
+            self.get_object(), data=request.data, partial=True
         )
-        data = {
-            "status": _status,
-            "name": _name,
-            "description": _description,
-        }
-        serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             serializer.save()
